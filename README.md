@@ -1,7 +1,7 @@
 multitmux
 =========
 
-Operate multiple windows in tmux
+ssh to multiple hosts with tmux.
 
 ## SYNOPSIS
     multitmux open file
