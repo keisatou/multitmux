@@ -1,0 +1,43 @@
+#!/bin/sh
+# vim: filetype=sh
+
+usage () {
+    echo in usage
+    exit 1
+}
+do_open () {
+    echo do_open
+}
+do_exec () {
+    echo do_exec "$@"
+}
+do_close () {
+    echo do_close
+}
+
+command=$1
+
+case "$command" in
+    "open" )
+        file=$2
+        [ ! -f $file ] && usage
+        do_open $file
+        ;;
+    "exec" )
+        command=$2
+        [ "X$command" = "X" ] && usage
+        do_exec $command
+        ;;
+    "close" )
+        do_close
+        ;;
+    *)
+        usage
+        ;;
+esac
+
+
+
+#tmux new-session 'for i in `jot 5`; do tmux new-window -d; done; tmux select-window -t 1'
+
+
