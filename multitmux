@@ -1,43 +1,60 @@
-#!/bin/sh
+#!/bin/bash
 # vim: filetype=sh
 
+# Global variables
+sn=tmux
+
+# Functions
 usage () {
     echo in usage
     exit 1
 }
+
 do_open () {
-    echo do_open
+    local f=$1
+    local cnt=1
+    tmux new-session -s "$sn" -n main -d
+    while read line
+    do
+        tmux new-window -t "$sn:$cnt"
+        cnt=$(( $cnt + 1 ))
+    done < "$f"
+
+    tmux select-window -t "$sn:0"
+    tmux -2 attach-session -t "$sn"
+
 }
+
 do_exec () {
     echo do_exec "$@"
 }
+
 do_close () {
     echo do_close
 }
 
-command=$1
+main () {
+    local command=$1
 
-case "$command" in
-    "open" )
-        file=$2
-        [ ! -f $file ] && usage
-        do_open $file
-        ;;
-    "exec" )
-        command=$2
-        [ "X$command" = "X" ] && usage
-        do_exec $command
-        ;;
-    "close" )
-        do_close
-        ;;
-    *)
-        usage
-        ;;
-esac
+    case "$command" in
+        "open" )
+            local file=$2
+            [ ! -f "$file" ] && usage
+            do_open "$file"
+            ;;
+        "exec" )
+            local command=$2
+            [ "X$command" = "X" ] && usage
+            do_exec "$command"
+            ;;
+        "close" )
+            do_close
+            ;;
+        *)
+            usage
+            ;;
+    esac
+}
 
-
-
-#tmux new-session 'for i in `jot 5`; do tmux new-window -d; done; tmux select-window -t 1'
-
+main "$@"
 
