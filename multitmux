@@ -10,19 +10,23 @@ usage () {
     exit 1
 }
 
+## open a file that contains a host name per line and then ssh to them.
 do_open () {
     local f=$1
     local cnt=1
+
     tmux new-session -s "$sn" -n main -d
-    while read line
+
+    while read host
     do
-        tmux new-window -t "$sn:$cnt"
+        tmux new-window -t "$sn:$cnt" -n ''
+        tmux send-keys -t "$sn:$cnt" C-l "ssh $host" C-m
         cnt=$(( $cnt + 1 ))
     done < "$f"
 
+    # attach to main (number 0) window.
     tmux select-window -t "$sn:0"
     tmux -2 attach-session -t "$sn"
-
 }
 
 do_exec () {
