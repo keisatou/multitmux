@@ -30,11 +30,14 @@ do_open () {
 }
 
 do_exec () {
-    echo do_exec "$@"
+    for window in `tmux list-windows -F '#{window_index}' | grep -v '0'`;
+    do
+        tmux send-keys -t "$sn:$window" C-l "$@" C-m
+    done
 }
 
 do_close () {
-    echo do_close
+    tmux kill-session -t "$sn"
 }
 
 main () {
@@ -62,3 +65,4 @@ main () {
 
 main "$@"
 
+exit $?
