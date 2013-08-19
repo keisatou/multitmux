@@ -6,7 +6,28 @@ sn=tmux
 
 # Functions
 usage () {
-    echo in usage
+    pname=$(basename $0)
+    cat <<EOS
+    NAME
+      $pname - ssh to multiple hosts with tmux.
+
+    SYNOPSYS
+      $pname open file
+      $pname exec 'command'
+      $pname close
+
+    DESCRIPTION
+      $ cat host.list
+      host1
+      host2
+      host3
+      $ $pname open host.list
+        ssh to host1 host2 host3 in separate tmux window.
+      $ $pname exec 'command'
+        execute command on each host.
+      $ $pname close
+        close opened windows.
+EOS
     exit 1
 }
 
