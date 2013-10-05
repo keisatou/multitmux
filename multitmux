@@ -41,7 +41,7 @@ do_open () {
     while read host
     do
         tmux new-window -t "$sn:$cnt" -n ''
-        tmux send-keys -t "$sn:$cnt" C-l "ssh $host" C-m
+        tmux send-keys -t "$sn:$cnt" "ssh $host" C-m
         cnt=$(( $cnt + 1 ))
     done < "$f"
 
@@ -53,7 +53,7 @@ do_open () {
 do_exec () {
     for window in `tmux list-windows -F '#{window_index}' | grep -v '0'`;
     do
-        tmux send-keys -t "$sn:$window" C-l "$@" C-m
+        tmux send-keys -t "$sn:$window" "$@" C-m
     done
 }
 
