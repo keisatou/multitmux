@@ -6,7 +6,7 @@ sn=tmux
 
 # Functions
 usage () {
-    pname=$(basename $0)
+    local pname=$(basename $0)
     cat <<EOS
     NAME
       $pname - ssh to multiple hosts with tmux.
@@ -52,6 +52,7 @@ do_open () {
 }
 
 do_exec () {
+    local window
     for window in `tmux list-windows -F '#{window_index}' | grep -v '0'`;
     do
         tmux send-keys -t "$sn:$window" "$@" C-m
@@ -60,6 +61,21 @@ do_exec () {
 
 do_close () {
     tmux kill-session -t "$sn"
+}
+
+# set echo back considering Ctrl-C while "stty -echo".
+trap "stty echo; exit 100" 2
+
+do_password () {
+    local pwd
+    printf "Password:"
+    stty -echo
+    read pwd
+    for window in `tmux list-windows -F '#{window_index}' | grep -v '0'`;
+    do
+        tmux send-keys -t "$sn:$window" "$pwd" C-m
+    done
+    stty echo
 }
 
 exit_with_msg () {
@@ -105,6 +121,9 @@ main () {
             ;;
         "close" )
             do_close
+            ;;
+        "password" )
+            do_password
             ;;
         *)
             usage
