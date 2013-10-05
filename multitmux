@@ -43,6 +43,7 @@ do_open () {
         tmux new-window -t "$sn:$cnt" -n ''
         tmux send-keys -t "$sn:$cnt" "ssh $host" C-m
         cnt=$(( $cnt + 1 ))
+        $SLEEP $SLEEP_ARG
     done < "$f"
 
     # attach to main (number 0) window.
@@ -61,7 +62,34 @@ do_close () {
     tmux kill-session -t "$sn"
 }
 
+exit_with_msg () {
+    local msg="$1"
+    local status="$2"
+    echo "ERROR: $msg"
+    exit "$status"
+}
+
+prepare () {
+    # OS specific settings.
+    local os=`uname`
+    case "$os" in
+        "Darwin" )
+            SLEEP="sleep"
+            SLEEP_ARG=0.2 # 200 [msec]
+            ;;
+        "Linux" )
+            SLEEP="usleep"
+            SLEEP_ARG=200000 # 200 [msec]
+            ;;
+        *)
+            exit_with_msg "OS <$os> is not supported." 10
+            ;;
+    esac
+}
+
 main () {
+    prepare
+
     local command=$1
 
     case "$command" in
