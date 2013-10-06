@@ -14,6 +14,7 @@ usage () {
     SYNOPSYS
       $pname open file
       $pname exec 'command'
+      $pname password
       $pname close
 
     DESCRIPTION
@@ -24,7 +25,9 @@ usage () {
       $ $pname open host.list
         ssh to host1 host2 host3 in separate tmux window.
       $ $pname exec 'command'
-        execute command on each host.
+        execute command on each hosts.
+      $ $pname password
+        send password to each hosts.
       $ $pname close
         close opened windows.
 EOS
