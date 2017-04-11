@@ -37,20 +37,25 @@ EOS
 ## open a file that contains a host name per line and then ssh to them.
 do_open () {
     local f=$1
-    local cnt=1
+    local window=1
 
     tmux new-session -s "$sn" -n main -d
+    tmux new-window -t "$sn:$window" -n ''
 
     while read host
     do
-        tmux new-window -t "$sn:$cnt" -n ''
-        tmux send-keys -t "$sn:$cnt" "ssh $host" C-m
-        cnt=$(( $cnt + 1 ))
+        tmux send-keys -t "$sn:$window" "ssh $host" C-m
+        # NOTE: need to set layout each time because the window resized
+        tmux select-layout -t "$sn:$window" tiled
+        tmux split-window -t "$sn:$window"
         $SLEEP $SLEEP_ARG
     done < "$f"
 
-    # attach to main (number 0) window.
-    tmux select-window -t "$sn:0"
+    # kill last unused pane
+    tmux kill-pane -t "$sn:$window"
+
+    tmux select-window -t "$sn:$window"
+    tmux set-window-option synchronize-panes on
     tmux -2 attach-session -t "$sn"
 }
 
