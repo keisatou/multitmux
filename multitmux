@@ -14,7 +14,6 @@ usage () {
     SYNOPSYS
       $pname open file
       $pname send '#{pane_index}'
-      $pname password
       $pname close
 
     DESCRIPTION
@@ -28,8 +27,6 @@ usage () {
         send-keys to all panes.
         In this example, pane_index is sent. host1:0 host2:1 host3:2 respectively.
         see: http://man.openbsd.org/OpenBSD-current/man1/tmux.1#FORMATS
-      $ $pname password
-        send password to each hosts.
       $ $pname close
         close opened windows.
 EOS
@@ -68,18 +65,6 @@ do_close () {
 # set echo back considering Ctrl-C while "stty -echo".
 trap "stty echo; exit 100" 2
 
-do_password () {
-    local pwd
-    printf "Password:"
-    stty -echo
-    read pwd
-    for window in `tmux list-windows -F '#{window_index}' | grep -v '0'`;
-    do
-        tmux send-keys -t "$sn:$window" "$pwd" C-m
-    done
-    stty echo
-}
-
 do_send () {
     local cmd=$1
 
@@ -91,7 +76,7 @@ do_send () {
     for command in $commands
     do
         tmux select-pane -t "$cnt"
-        tmux send-keys -t 'tmux:1' "$command"
+        tmux send-keys -t 'tmux:1' $command
         cnt=$(( $cnt + 1 ))
     done
 
@@ -128,7 +113,7 @@ main () {
 
     local command=$1
 
-    if [ $# -eq 1 ]; then
+    if [ $# -eq 1 -a -f $1 ]; then
         # default to 'open' command
         command='open'
     else
@@ -143,9 +128,6 @@ main () {
             ;;
         "close" )
             do_close
-            ;;
-        "password" )
-            do_password
             ;;
         "send" )
             local cmd="$1"
