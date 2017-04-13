@@ -14,7 +14,6 @@ usage () {
     SYNOPSYS
       $pname open file
       $pname send '#{pane_index}'
-      $pname exec 'command'
       $pname password
       $pname close
 
@@ -29,8 +28,6 @@ usage () {
         send-keys to all panes.
         In this example, pane_index is sent. host1:0 host2:1 host3:2 respectively.
         see: http://man.openbsd.org/OpenBSD-current/man1/tmux.1#FORMATS
-      $ $pname exec 'command'
-        execute command on each hosts.
       $ $pname password
         send password to each hosts.
       $ $pname close
@@ -62,14 +59,6 @@ do_open () {
     tmux select-window -t "$sn:$window"
     tmux set-window-option synchronize-panes on
     tmux -2 attach-session -t "$sn"
-}
-
-do_exec () {
-    local window
-    for window in `tmux list-windows -F '#{window_index}' | grep -v '0'`;
-    do
-        tmux send-keys -t "$sn:$window" "$@" C-m
-    done
 }
 
 do_close () {
@@ -151,11 +140,6 @@ main () {
             local file="$1"
             [ ! -f "$file" ] && usage
             do_open "$file"
-            ;;
-        "exec" )
-            local command="$1"
-            [ "X$command" = "X" ] && usage
-            do_exec "$command"
             ;;
         "close" )
             do_close
