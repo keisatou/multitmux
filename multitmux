@@ -13,6 +13,7 @@ usage () {
 
     SYNOPSYS
       $pname open file
+      $pname send '#{pane_index}'
       $pname exec 'command'
       $pname password
       $pname close
@@ -24,6 +25,10 @@ usage () {
       host3
       $ $pname open host.list
         ssh to host1 host2 host3 in separate tmux window.
+      $ $pname send '#{pane_index}'
+        send-keys to all panes.
+        In this example, pane_index is sent. host1:0 host2:1 host3:2 respectively.
+        see: http://man.openbsd.org/OpenBSD-current/man1/tmux.1#FORMATS
       $ $pname exec 'command'
         execute command on each hosts.
       $ $pname password
@@ -86,6 +91,24 @@ do_password () {
     stty echo
 }
 
+do_send () {
+    local cmd=$1
+
+    tmux set-window-option -t 'tmux:1' synchronize-panes off
+
+    local commands=$(tmux list-panes -t 'tmux:1' -F "$cmd")
+    tmux select-window -t 'tmux:1'
+    local cnt=0
+    for command in $commands
+    do
+        tmux select-pane -t "$cnt"
+        tmux send-keys -t 'tmux:1' "$command"
+        cnt=$(( $cnt + 1 ))
+    done
+
+    tmux set-window-option -t 'tmux:1' synchronize-panes on
+}
+
 exit_with_msg () {
     local msg="$1"
     local status="$2"
@@ -132,6 +155,10 @@ main () {
             ;;
         "password" )
             do_password
+            ;;
+        "send" )
+            local cmd="$2"
+            do_send "$cmd"
             ;;
         *)
             usage
